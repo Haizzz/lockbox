@@ -11,7 +11,7 @@ status = json.load(open(settings.STATUS_FILE_PATH, "r"))
 # check if this folder has been set up with a password before
 if not status.get("password_set", False):
     # password not set, run initialisation function
-    print("Lockbox has not been set for this folder")
+    print("Lockbox has not been set up for this folder")
     print("Running setup process...")
     password_data = setup()
     # update status dict with new password details
