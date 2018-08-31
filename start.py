@@ -1,32 +1,67 @@
 # contain functions to setup lockbox in a new folder
 import os
 import base64
+import json
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+import settings
+from encryption import generate_key_from_password
+from utils import StatusManager
 
-def setup() -> dict:
+
+def set_password() -> dict:
     """
     Set a password for this folder,
-    return the salt and password hash in a dictionary
+    return the salt and encrypted check phrase in a dictionary
+    :param:
     :return: dict
     """
-    # https://cryptography.io/en/latest/fernet/#using-passwords-with-fernet
-    password = input("New password: ").encode()
+    password = input("New password: ")
     print("Creating salt...")
     salt = os.urandom(16)
-    print("Hashing password...")
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=1000000,
-        backend=default_backend()
-    )
-    hashed_password = base64.urlsafe_b64encode(kdf.derive(password))
+    print("Generating key...")
+    key = generate_key_from_password(password, salt=salt)
+    print("Generating check phrase...")
+    # encrypt the check phrase so in the future the password
+    # can be checked to see if it's correct
+    f = Fernet(key)
+    encrypted_check_phrase = f.encrypt(settings.CHECK_PHRASE)
     return {
         "salt": salt.hex(),
-        "hashed_password": hashed_password.hex()
+        "encrypted_check_phrase": encrypted_check_phrase.hex()
     }
+
+
+def full_setup():
+    """
+    Do a full setup including creating necessary files. This will
+    truncate any existing files
+    Files:
+    - logs
+    - status.json
+    """
+    status_content = {
+        "password_set": False,
+        "encrypted": False,
+        "salt": "",
+        "encrypted_check_phrase": ""
+    }
+    json.dump(status_content, open(settings.STATUS_FILE_PATH, "w+"),
+              indent=4)
+    status_manager = StatusManager()
+    # create the log file
+    with open(settings.LOG_FILE_PATH, "w+") as f:
+        pass
+    # write log
+    status_manager.log_activity("resetted data files")
+    password_data = set_password()
+    # update status dict with new password details
+    status_manager.update("salt", password_data["salt"], forced=True)
+    status_manager.update("encrypted_check_phrase",
+                          password_data["encrypted_check_phrase"], forced=True)
+    # set password_set to true
+    status_manager.update("password_set", True)
+    status_manager.log_activity("set password")
