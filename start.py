@@ -44,7 +44,6 @@ def full_setup():
     - status.json
     """
     status_content = {
-        "password_set": False,
         "encrypted": False,
         "salt": "",
         "encrypted_check_phrase": ""
@@ -53,7 +52,7 @@ def full_setup():
               indent=4)
     status_manager = StatusManager()
     # do not truncate log file
-    with open(settings.LOG_FILE_PATH, "r+") as f:
+    with open(settings.LOG_FILE_PATH, "a+") as f:
         pass
     # write log
     status_manager.log_activity("resetted data files")
@@ -62,6 +61,4 @@ def full_setup():
     status_manager.update("salt", password_data["salt"], forced=True)
     status_manager.update("encrypted_check_phrase",
                           password_data["encrypted_check_phrase"], forced=True)
-    # set password_set to true
-    status_manager.update("password_set", True)
     status_manager.log_activity("set new password")

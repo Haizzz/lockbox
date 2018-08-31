@@ -13,17 +13,16 @@ from encryption import (
     generate_key_from_password,
     check_correct_password
 )
-
-status_manager = StatusManager()
-status = status_manager.get_status()
 # check if this folder has been set up with a password before
-if not status.get("password_set", False):
+if not os.path.isfile(settings.STATUS_FILE_PATH):
     # password not set, run initialisation function
     print("Lockbox has not been set up for this folder")
     print("Running setup process...")
     full_setup()
     print("Setup complete!")
 else:
+    status_manager = StatusManager()
+    status = status_manager.get_status()
     # whether encrypting or decrypting, still need the password input
     input_password = input("Password, // to reset password: ")
     if input_password == "//":
