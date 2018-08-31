@@ -15,12 +15,14 @@ def setup() -> dict:
     """
     # https://cryptography.io/en/latest/fernet/#using-passwords-with-fernet
     password = input("New password: ").encode()
+    print("Creating salt...")
     salt = os.urandom(16)
+    print("Hashing password...")
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
         salt=salt,
-        iterations=100000,
+        iterations=1000000,
         backend=default_backend()
     )
     hashed_password = base64.urlsafe_b64encode(kdf.derive(password))
@@ -28,12 +30,3 @@ def setup() -> dict:
         "salt": salt.hex(),
         "hashed_password": hashed_password.hex()
     }
-
-
-"""
-{
-    "password_set": false,
-    "salt": "",
-    "hashed_password": ""
-}
-"""
