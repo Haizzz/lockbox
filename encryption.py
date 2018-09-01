@@ -112,17 +112,7 @@ def recursive_file_action(path, fx, *args, **kwargs):
         for filename in filenames:
             # construct file path
             file_path = os.path.join(dirpath, filename)
-            # don't encrypt hidden files
-            if filename[0] == ".":
-                print(f"skipping hidden file {file_path}")
-                continue
-            # don't encrypt itself
-            if file_path != settings.APPLICATION_FILE_PATH:
+            # don't encrypt itself or data files
+            if file_path not in settings.DONT_ENCRYPT:
                 print(f"actioning on {file_path}")
                 fx(file_path, *args, **kwargs)
-
-        for dirname in dirnames:
-            # construct directory path
-            dir_path = os.path.join(dirpath, dirname)
-            # recursively call
-            recursive_file_action(dir_path, fx, *args, **kwargs)
