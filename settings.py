@@ -9,8 +9,7 @@ elif __file__:
     name = __file__
     TEST_MODE = True
 APPLICATION_PATH = os.path.dirname(name)
-APPLICATION_FILE_PATH = os.path.join(
-    APPLICATION_PATH, os.path.basename(name))
+APPLICATION_FILE_PATH = sys.executable
 
 # provide a file for test mode instead of recursively encrypting everything
 ENCRYPT_FOLDER_PATH = "test_folder" if TEST_MODE else APPLICATION_PATH
