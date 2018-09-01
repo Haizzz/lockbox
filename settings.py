@@ -25,3 +25,6 @@ DONT_ENCRYPT = (  # path to files to ignore for encrypting
 
 HASH_ITERATIONS = 500000
 CHECK_PHRASE = b"lorem ipsum"
+ENCRYPTED_FILE_EXTENSION = ".locked"
+
+AVALAIBLE_ACTIONS = ("encrypt", "decrypt", "reset")

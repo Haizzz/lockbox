@@ -44,7 +44,6 @@ def full_setup():
     - status.json
     """
     status_content = {
-        "encrypted": False,
         "salt": "",
         "encrypted_check_phrase": ""
     }

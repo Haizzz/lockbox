@@ -20,6 +20,9 @@ def encrypt_file(path, key):
     :param key: byte string encryption key
     :return: None
     """
+    # if file ends in encrypted file extension, skip
+    if os.path.splitext(path)[1] == settings.ENCRYPTED_FILE_EXTENSION:
+        return
     f = Fernet(key)
     # keep reading, encrypting and writting to file separate
     # incase encyrpting fail file doesn't get truncated
@@ -31,6 +34,8 @@ def encrypt_file(path, key):
     # write to file
     with open(path, "wb") as file:
         file.write(cypher)
+    # rename the file with encrypted file extension
+    os.rename(path, path + settings.ENCRYPTED_FILE_EXTENSION)
 
 
 def decrypt_file(path, key):
@@ -41,6 +46,9 @@ def decrypt_file(path, key):
     :param key: byte string encryption key
     :return: None
     """
+    # if file extension does not end with encrypted file extension, skip
+    if os.path.splitext(path)[1] != settings.ENCRYPTED_FILE_EXTENSION:
+        return
     f = Fernet(key)
     # keep reading, decrypting and writting to file separate
     # incase decrypting fail file doesn't get truncated
@@ -52,6 +60,14 @@ def decrypt_file(path, key):
     # write to file
     with open(path, "wb") as file:
         file.write(text)
+    # remove encrypted file extension from file
+    path_components = os.path.split(path)
+    os.rename(
+        path,
+        os.path.join(
+            path_components[0], os.path.splitext(path_components[1])[0]
+        )
+    )
 
 
 def generate_key_from_password(pwd, salt=None):
@@ -114,5 +130,20 @@ def recursive_file_action(path, fx, *args, **kwargs):
             file_path = os.path.join(dirpath, filename)
             # don't encrypt itself or data files
             if file_path not in settings.DONT_ENCRYPT:
-                print(f"actioning on {file_path}")
+                print(f"|> {file_path}")
                 fx(file_path, *args, **kwargs)
+
+
+def check_folder_fully_decrypted(path):
+    """
+    Go through all files in the given path and check if
+    they're all decrypted (does not have encrypted file extension)
+
+    :param path: str the path to check
+    :return: boolean
+    """
+    for (dirpath, dirnames, filenames) in os.walk(path):
+        for filename in filenames:
+            if os.path.splitext(filename)[1] == settings.ENCRYPTED_FILE_EXTENSION:
+                return False
+    return True
