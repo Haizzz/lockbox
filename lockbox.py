@@ -23,41 +23,42 @@ if not os.path.isfile(settings.STATUS_FILE_PATH):
     print("Running setup process...")
     full_setup()
     print("Setup complete!")
-else:
-    status_manager = StatusManager()
-    status = status_manager.get_status()
-    # get action they want to take
-    while True:
-        print("Select an action: {}".format(
-            ", ".join(settings.AVALAIBLE_ACTIONS)
-        ))
-        action_input = input("Action: ")
-        if action_input.lower() in settings.AVALAIBLE_ACTIONS:
-            break
-        print("Invalid action given")
-    if action_input == "reset":
-        # folders have to be decrypted in order to reset password
-        if not check_folder_fully_decrypted(settings.ENCRYPT_FOLDER_PATH):
-            print("Folder must be fully decrypted before resetting password")
-            sys.exit()
-        full_setup()
+
+status_manager = StatusManager()
+status = status_manager.get_status()
+# get action they want to take
+while True:
+    print("Select an action: {}".format(
+        ", ".join(settings.AVALAIBLE_ACTIONS)
+    ))
+    action_input = input("Action: ")
+    if action_input.lower() in settings.AVALAIBLE_ACTIONS:
+        break
+    print("Invalid action given")
+if action_input == "reset":
+    # folders have to be decrypted in order to reset password
+    if not check_folder_fully_decrypted(settings.ENCRYPT_FOLDER_PATH):
+        print("Folder must be fully decrypted before resetting password")
         sys.exit()
-    # whether encrypting or decrypting, still need the password input
-    while True:
-        password_input = input("Password: ")
-        if check_correct_password(status, password_input):
-            break
-        print("Password entered is incorrect")
+    full_setup()
+    sys.exit()
 
-    key = generate_key_from_password(password_input, salt=status["salt"])
-    if action_input == "encrypt":
-        action = encrypt_file
-        msg = "encrypted folder"
-    elif action_input == "decrypt":
-        action = decrypt_file
-        msg = "decrypted folder"
+# whether encrypting or decrypting, still need the password input
+while True:
+    password_input = input("Password: ")
+    if check_correct_password(status, password_input):
+        break
+    print("Password entered is incorrect")
 
-    recursive_file_action(settings.ENCRYPT_FOLDER_PATH,
-                          action, key)
-    # log and set new encrypted status
-    status_manager.log_activity(msg)
+key = generate_key_from_password(password_input, salt=status["salt"])
+if action_input == "encrypt":
+    action = encrypt_file
+    msg = "encrypted folder"
+elif action_input == "decrypt":
+    action = decrypt_file
+    msg = "decrypted folder"
+
+recursive_file_action(settings.ENCRYPT_FOLDER_PATH,
+                      action, key)
+# log and set new encrypted status
+status_manager.log_activity(msg)
