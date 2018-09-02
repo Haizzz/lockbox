@@ -3,6 +3,7 @@ Lockbox: quickly encrypt and decrypt an entire folder
 """
 import json
 import sys
+import os
 
 import settings
 from start import set_password, full_setup
@@ -50,13 +51,11 @@ else:
 
     key = generate_key_from_password(password_input, salt=status["salt"])
     if action_input == "encrypt":
-        print("Encrypting files...")
         action = encrypt_file
         msg = "encrypted folder"
     elif action_input == "decrypt":
-        print("Decrypting files...")
         action = decrypt_file
-        msg = "encrypted folder"
+        msg = "decrypted folder"
 
     recursive_file_action(settings.ENCRYPT_FOLDER_PATH,
                           action, key)

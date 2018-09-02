@@ -1,11 +1,12 @@
 # provide high level encryption methods
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 import base64
 import logging
+from tqdm import tqdm
 
 import settings
 
@@ -27,13 +28,20 @@ def encrypt_file(path, key):
     # keep reading, encrypting and writting to file separate
     # incase encyrpting fail file doesn't get truncated
     # read
-    with open(path, "rb") as file:
-        file_content = file.read()
-    # encrypt
-    cypher = f.encrypt(file_content)
-    # write to file
-    with open(path, "wb") as file:
-        file.write(cypher)
+    try:
+        with open(path, "rb") as file:
+            file_content = file.read()
+        # encrypt
+        cypher = f.encrypt(file_content)
+        # write to file
+        with open(path, "wb") as file:
+            file.write(cypher)
+    except PermissionError:
+        # not enough permission, skip
+        return
+    except FileNotFoundError:
+        # file is an alias, skip
+        return
     # rename the file with encrypted file extension
     os.rename(path, path + settings.ENCRYPTED_FILE_EXTENSION)
 
@@ -53,15 +61,22 @@ def decrypt_file(path, key):
     # keep reading, decrypting and writting to file separate
     # incase decrypting fail file doesn't get truncated
     # read
-    with open(path, "rb") as file:
-        file_content = file.read()
-    # decrypt
-    text = f.decrypt(file_content)
-    # write to file
-    with open(path, "wb") as file:
-        file.write(text)
-    # remove encrypted file extension from file
-    path_components = os.path.split(path)
+    try:
+        with open(path, "rb") as file:
+            file_content = file.read()
+        # decrypt
+        text = f.decrypt(file_content)
+        # write to file
+        with open(path, "wb") as file:
+            file.write(text)
+        # remove encrypted file extension from file
+        path_components = os.path.split(path)
+    except PermissionError:
+        # not enough permission, skip
+        return
+    except FileNotFoundError:
+        # file is an alias, skip
+        return
     os.rename(
         path,
         os.path.join(
@@ -108,7 +123,10 @@ def check_correct_password(status, pwd):
         pwd, salt=status.get("salt")
     )
     f = Fernet(key)
-    decrypt_output = f.decrypt(status["encrypted_check_phrase"])
+    try:
+        decrypt_output = f.decrypt(status["encrypted_check_phrase"])
+    except InvalidToken:
+        return False
     return decrypt_output.decode("utf-8") != settings.CHECK_PHRASE
 
 
@@ -124,14 +142,20 @@ def recursive_file_action(path, fx, *args, **kwargs):
     :param kwargs: passed to fx
     :return: None
     """
+    # generate list of files to encrypt and encrypt separately
+    # to make a pretty progress bar
+    file_paths = []
+    print("Collecting files...")
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames:
             # construct file path
             file_path = os.path.join(dirpath, filename)
-            # don't encrypt itself or data files
-            if file_path not in settings.DONT_ENCRYPT:
-                print(f"|> {file_path}")
-                fx(file_path, *args, **kwargs)
+            file_paths.append(file_path)
+    print("Running process...")
+    for path in tqdm(file_paths):
+        # don't encrypt itself or data files
+        if path not in settings.DONT_ENCRYPT:
+            fx(path, *args, **kwargs)
 
 
 def check_folder_fully_decrypted(path):
