@@ -19,7 +19,7 @@ cd ../
 rm -rf lockbox_repo
 ```
 
-The executable is now inside the `dist` folder. Copy this file into your folder and double click to set a password and get started
+The executable is now built. Copy this file into your folder and double click to set a password and get started
 
 ## Notes
 - The extension `.locked` is used to tell lockbox is a file is already encrypted
