@@ -4,6 +4,7 @@ Lockbox: quickly encrypt and decrypt an entire folder
 import json
 import sys
 import os
+import getpass
 
 import settings
 from start import set_password, full_setup
@@ -45,7 +46,7 @@ if action_input == "reset":
 
 # whether encrypting or decrypting, still need the password input
 while True:
-    password_input = input("Password: ")
+    password_input = getpass.getpass()
     if check_correct_password(status, password_input):
         break
     print("Password entered is incorrect")
