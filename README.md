@@ -25,7 +25,7 @@ rm -rf lockbox_repo
 The executable is now built. Copy this file into your folder and double click to set a password and get started
 
 ## Usage
-![Usage gif](https://github.com/Haizzz/lockbox/blob/master/media/Kapture%202018-09-02%20at%2021.05.28.gif?raw=true)
+![Usage gif](https://github.com/Haizzz/lockbox/blob/master/media/usage.gif?raw=true)
 
 ## Notes
 - The extension `.locked` is used to tell lockbox is a file is already encrypted
