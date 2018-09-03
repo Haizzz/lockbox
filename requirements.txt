@@ -1,6 +1,12 @@
+altgraph==0.16.1
 asn1crypto==0.24.0
 cffi==1.11.5
 cryptography==2.3.1
+future==0.16.0
 idna==2.7
+macholib==1.11
+pefile==2018.8.8
 pycparser==2.18
+PyInstaller==3.3.1
 six==1.11.0
+tqdm==4.25.0
