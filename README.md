@@ -10,7 +10,7 @@ Lockbox uses [pyinstaller](https://www.pyinstaller.org/) to create an executable
 # clone repo
 git clone https://github.com/Haizzz/lockbox.git lockbox_repo
 cd lockbox_repo
-./install.sh
+bash install.sh
 ```
 
 The executable is now built. Copy this file into your folder and double click to set a password and get started
