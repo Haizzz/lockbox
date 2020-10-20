@@ -7,6 +7,6 @@ idna==2.7
 macholib==1.11
 pefile==2018.8.8
 pycparser==2.18
-PyInstaller==3.3.1
+PyInstaller==4.0.0
 six==1.11.0
 tqdm==4.25.0
